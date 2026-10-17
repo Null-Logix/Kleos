@@ -38,6 +38,26 @@ ignore = [
     # on every eframe/accesskit bump.
     { id = "RUSTSEC-2026-0194", reason = "quick-xml DoS; transitive via GUI AT-SPI (zbus_xml) only; local a11y XML not untrusted input; no safe upgrade" },
     { id = "RUSTSEC-2026-0195", reason = "quick-xml DoS; transitive via GUI AT-SPI (zbus_xml) only; local a11y XML not untrusted input; no safe upgrade" },
+    # zip 2.x: three extraction advisories (RUSTSEC-2026-0367 SUID/SGID bits
+    # preserved on extract, -0368 symlink targets escaping the destination,
+    # -0369 permissions applied through symlinks). All three live in
+    # ZipArchive::extract / ZipStreamReader::extract, which write entries to the
+    # filesystem. Kleos never extracts to disk: the ingestion zip and docx
+    # parsers open archives from an in-memory cursor and read entry bytes only.
+    # The fix exists only in zip >= 9.0.0, a breaking major bump. Upgrade
+    # trigger: any new code that calls extract(), or the next ingestion-parser
+    # change, whichever comes first. Reviewed 2026-10-17.
+    { id = "RUSTSEC-2026-0367", reason = "zip extract() SUID/SGID; kleos parses archives in memory and never calls extract(); fix only in zip 9; reviewed 2026-10-17" },
+    { id = "RUSTSEC-2026-0368", reason = "zip extract() symlink escape; kleos never calls extract(); fix only in zip 9; reviewed 2026-10-17" },
+    { id = "RUSTSEC-2026-0369", reason = "zip extract() permissions via symlink; kleos never calls extract(); fix only in zip 9; reviewed 2026-10-17" },
+    # zbus 4/5 support crates declared unmaintained (zvariant -0370, zbus_names
+    # -0371, zvariant_derive -0372), no patched release. Transitive only through
+    # the desktop installer GUI: the file dialog (rfd -> ashpd -> zbus 5) and
+    # the AT-SPI accessibility stack (accesskit -> atspi -> zbus 4). The server
+    # and CLI never link zbus. Review on every rfd, eframe, or accesskit bump.
+    { id = "RUSTSEC-2026-0370", reason = "zvariant unmaintained; transitive via install GUI (rfd/atspi -> zbus) only; no patched release" },
+    { id = "RUSTSEC-2026-0371", reason = "zbus_names unmaintained; transitive via install GUI (rfd/atspi -> zbus) only; no patched release" },
+    { id = "RUSTSEC-2026-0372", reason = "zvariant_derive unmaintained; transitive via install GUI (rfd/atspi -> zbus) only; no patched release" },
 ]
 
 [licenses]
